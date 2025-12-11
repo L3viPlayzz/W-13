@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && tsc",
     "preview": "vite preview --port 8080",
     "dev:server": "tsx server/index.ts",
     "start:server": "NODE_ENV=production node dist/index.cjs",

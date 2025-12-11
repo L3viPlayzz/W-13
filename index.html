@@ -7,18 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="mobile-web-app-capable" content="yes" />
 
-    <meta property="og:title" content="Windows 13" />
-    <meta property="og:description" content="Experience the next generation of Windows" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="/icon-512.png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Windows 13" />
-    <meta name="twitter:description" content="Experience the next generation of Windows" />
-    <meta name="twitter:image" content="/icon-512.png" />
-
     <title>Windows 13</title>
-
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="/icon-192.png" />
     <link rel="shortcut icon" href="/icon-192.png" />
     <link rel="manifest" href="/manifest.json" />
@@ -33,10 +22,10 @@
 
     <!-- Inline CSS -->
     <style>
-      * {
+      * { 
+        box-sizing: border-box;
         -webkit-tap-highlight-color: transparent;
         -webkit-touch-callout: none;
-        box-sizing: border-box;
       }
       html, body, #root {
         margin: 0;
@@ -64,24 +53,22 @@
   <body>
     <div id="root"></div>
 
-    <!-- Main React entry -->
+    <!-- React entry -->
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- Service Worker -->
-    <script>
+    <!-- Service Worker registration -->
+    <script type="module">
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-              console.log('Service Worker registered:', registration);
+            .then(reg => console.log('Service Worker registered:', reg))
+            .catch(err => console.error('SW registration failed:', err));
 
-              navigator.serviceWorker.addEventListener('message', (event) => {
-                if (event.data?.type === 'SW_UPDATED') {
-                  alert('Een nieuwe versie van de app is beschikbaar. Vernieuw de pagina!');
-                }
-              });
-            })
-            .catch(err => console.error('Service Worker registration failed:', err));
+          navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data?.type === 'SW_UPDATED') {
+              alert('Een nieuwe versie van de app is beschikbaar. Vernieuw de pagina!');
+            }
+          });
         });
       }
     </script>

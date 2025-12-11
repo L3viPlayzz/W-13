@@ -79,3 +79,16 @@
     </script>
   </body>
 </html>
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(registration => {
+    console.log('SW registered');
+
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data?.type === 'SW_UPDATED') {
+        // Hier kan je een toast, modal of automatische reload triggeren
+        alert('Een nieuwe versie van de app is beschikbaar. Vernieuw de pagina!');
+      }
+    });
+  }).catch(err => console.log('SW registration failed:', err));
+}

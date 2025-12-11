@@ -142,3 +142,10 @@ html, body, #root {
     @apply hover:bg-white/50 dark:hover:bg-white/10 transition-all duration-200;
   }
 }
+
+link[rel="icon"],
+link[rel="apple-touch-icon"] {
+  width: 192px;
+  height: 192px;
+  object-fit: contain;
+}

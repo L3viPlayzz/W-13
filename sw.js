@@ -16,85 +16,50 @@ const STATIC_ASSETS = [
   '/wallpapers/neon_purple_blue_waves_wallpaper.png'
 ];
 
+// Install: cache static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(STATIC_ASSETS).catch(err => {
-          console.log('Cache addAll failed, adding individually');
-          return Promise.allSettled(
-            STATIC_ASSETS.map(url => cache.add(url).catch(() => console.log('Failed to cache:', url)))
-          );
-        });
-      })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
   );
   self.skipWaiting();
 });
 
+// Activate: verwijder oude caches
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then(keys => 
+      Promise.all(
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+      )
+    )
+  );
+  self.clients.claim();
+});
+
+// Fetch: cache-first met fallback naar network, en SPA fallback
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(event.request).then(cachedResponse => {
       if (cachedResponse) return cachedResponse;
 
       return fetch(event.request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
-          }
+        .then(networkResponse => {
+          if (!networkResponse || networkResponse.status !== 200) return networkResponse;
+
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+
           return networkResponse;
         })
         .catch(() => {
+          // React SPA fallback
           if (event.request.mode === 'navigate') {
-            return caches.match('/index.html'); // altijd je root fallback
+            return caches.match('/index.html');
           }
           return new Response('Offline', { status: 503 });
         });
     })
   );
-});
-
-  
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        if (response) {
-          fetch(event.request).then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, networkResponse.clone());
-              });
-            }
-          }).catch(() => {});
-          return response;
-        }
-        return fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
-          }
-          return networkResponse;
-        });
-      })
-      .catch(() => {
-        if (event.request.destination === 'document') {
-          return caches.match('/');
-        }
-        return new Response('Offline', { status: 503 });
-      })
-  );
-});
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      );
-    })
-  );
-  self.clients.claim();
 });

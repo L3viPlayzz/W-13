@@ -16,27 +16,34 @@ const STATIC_ASSETS = [
   '/wallpapers/neon_purple_blue_waves_wallpaper.png'
 ];
 
-// Install: cache static assets
+// Install
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
   );
-  self.skipWaiting();
+  self.skipWaiting(); // Activeer direct
 });
 
-// Activate: verwijder oude caches
+// Activate
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys => 
+    caches.keys().then(keys =>
       Promise.all(
         keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
       )
     )
   );
   self.clients.claim();
+
+  // Dispatch een event dat een update beschikbaar is
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      client.postMessage({ type: 'SW_UPDATED' });
+    });
+  });
 });
 
-// Fetch: cache-first met fallback naar network, en SPA fallback
+// Fetch
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
@@ -54,9 +61,8 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => {
-          // React SPA fallback
           if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
+            return caches.match('/index.html'); // SPA fallback
           }
           return new Response('Offline', { status: 503 });
         });

@@ -3,6 +3,23 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 
+import pg from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
+
+// Database URL uit Railway environment variables
+const DATABASE_URL = process.env["Win-13-database"];
+if (!DATABASE_URL) throw new Error("DATABASE_URL is niet ingesteld!");
+
+// Maak Postgres client
+const client = new pg.Client({
+  connectionString: DATABASE_URL,
+});
+await client.connect();
+
+// Drizzle ORM setup
+export const db = drizzle(client);
+
+
 const app = express();
 const httpServer = createServer(app);
 

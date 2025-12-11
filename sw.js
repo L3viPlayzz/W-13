@@ -32,21 +32,28 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-  
-  if (event.request.method !== 'GET') return;
-  
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return new Response(JSON.stringify({ error: 'Offline' }), {
-          status: 503,
-          headers: { 'Content-Type': 'application/json' }
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+
+      return fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          if (event.request.mode === 'navigate') {
+            return caches.match('/index.html'); // altijd je root fallback
+          }
+          return new Response('Offline', { status: 503 });
         });
-      })
-    );
-    return;
-  }
+    })
+  );
+});
+
   
   event.respondWith(
     caches.match(event.request)

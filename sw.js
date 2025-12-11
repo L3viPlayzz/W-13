@@ -1,4 +1,4 @@
-const CACHE_NAME = 'windows13-v3';
+const CACHE_NAME = 'windows13-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -16,34 +16,27 @@ const STATIC_ASSETS = [
   '/wallpapers/neon_purple_blue_waves_wallpaper.png'
 ];
 
-// Install
+// Install event – cache alle statische assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
   );
-  self.skipWaiting(); // Activeer direct
+  self.skipWaiting();
 });
 
-// Activate
+// Activate event – verwijder oude caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-      )
+    caches.keys().then(names =>
+      Promise.all(names.map(name => {
+        if (name !== CACHE_NAME) return caches.delete(name);
+      }))
     )
   );
   self.clients.claim();
-
-  // Dispatch een event dat een update beschikbaar is
-  self.clients.matchAll().then(clients => {
-    clients.forEach(client => {
-      client.postMessage({ type: 'SW_UPDATED' });
-    });
-  });
 });
 
-// Fetch
+// Fetch event – serve uit cache of fetch van netwerk
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
@@ -51,21 +44,19 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then(cachedResponse => {
       if (cachedResponse) return cachedResponse;
 
-      return fetch(event.request)
-        .then(networkResponse => {
-          if (!networkResponse || networkResponse.status !== 200) return networkResponse;
-
+      return fetch(event.request).then(networkResponse => {
+        if (networkResponse && networkResponse.status === 200) {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
-
-          return networkResponse;
-        })
-        .catch(() => {
-          if (event.request.mode === 'navigate') {
-            return caches.match('/index.html'); // SPA fallback
-          }
-          return new Response('Offline', { status: 503 });
-        });
+        }
+        return networkResponse;
+      }).catch(() => {
+        // Fallback naar index.html bij navigatie (React Router)
+        if (event.request.mode === 'navigate') {
+          return caches.match('/index.html');
+        }
+        return new Response('Offline', { status: 503 });
+      });
     })
   );
 });

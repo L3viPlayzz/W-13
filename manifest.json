@@ -1,15 +1,15 @@
 {
   "id": "/",
   "name": "Windows 13",
-  "short_name": "Windows 13",
-  "description": "Experience the next generation of Windows - A full desktop simulator with apps, games, and more",
+  "short_name": "Win 13",
+  "description": "Experience the next generation of Windows - A full desktop simulator with apps, games, and more!",
   "start_url": "/",
   "scope": "/",
   "display": "fullscreen",
   "display_override": ["fullscreen", "standalone", "minimal-ui"],
   "background_color": "#000000",
   "theme_color": "#0078D4",
-  "orientation": "landscape",
+  "orientation": "any",
   "categories": ["productivity", "utilities", "entertainment"],
   "icons": [
     {

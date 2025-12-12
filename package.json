@@ -4,17 +4,15 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-  // Frontend
+
   "dev": "vite",
   "build:frontend": "vite build",
   "preview": "vite preview --port 8080",
 
-  // Backend
   "dev:server": "tsx server/index.ts",
   "build:server": "tsc --outDir dist --rootDir .",
   "start:server": "NODE_ENV=production node dist/index.js",
 
-  // Alles tegelijk
   "build": "npm run build:frontend && npm run build:server",
   "start": "npm run start:server"
 }

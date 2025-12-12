@@ -5,10 +5,10 @@ WORKDIR /app
 # Kopieer package.json & lockfile
 COPY package*.json ./
 
-# Installeer dependencies inclusief dev
+# Installeer alle dependencies inclusief devDependencies
 RUN npm install
 
-# Kopieer volledige project
+# Kopieer de volledige projectbestanden
 COPY . .
 
 # Bouw frontend + backend
@@ -18,14 +18,12 @@ RUN npm run build
 FROM node:20 AS runner
 WORKDIR /app
 
-# Kopieer alleen package.json & production dependencies
-COPY package*.json ./
-RUN npm install --omit=dev
+# Kopieer alleen de production dependencies van de builder
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
 
-# Kopieer build output van de builder
+# Kopieer alleen de gecompileerde output
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/server ./server
-COPY --from=builder /app/shared ./shared
 
 # Stel de poort in waarop de server luistert
 EXPOSE 3000

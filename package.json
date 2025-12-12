@@ -4,18 +4,14 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-
-  "dev": "vite",
-  "build:frontend": "vite build",
-  "preview": "vite preview --port 8080",
-
-  "dev:server": "tsx server/index.ts",
-  "build:server": "tsc --outDir dist --rootDir .",
-  "start:server": "NODE_ENV=production node dist/index.js",
-
-  "build": "npm run build:frontend && npm run build:server",
-  "start": "npm run start:server"
-}
+    "dev": "vite",
+    "build:frontend": "vite build",
+    "preview": "vite preview --port 8080",
+    "dev:server": "tsx server/index.ts",
+    "build:server": "tsc --outDir dist --rootDir .",
+    "start:server": "NODE_ENV=production node dist/index.js",
+    "build": "npm run build:frontend && npm run build:server",
+    "start": "npm run start:server"
   },
   "dependencies": {
     "react": "^19.2.0",
@@ -44,3 +40,4 @@
   "engines": {
     "node": "20.x"
   }
+}

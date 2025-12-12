@@ -14,8 +14,8 @@
     "start": "npm run start:server"
   },
   "dependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "wouter": "^3.3.5",
     "@tanstack/react-query": "^5.60.5",
     "express": "^4.21.2",
